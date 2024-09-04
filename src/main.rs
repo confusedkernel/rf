@@ -51,6 +51,7 @@ fn trans(source: String) -> Vec<OpCode> {
     ops
 }
 
+// parse the opcodes into instruction
 fn parse(opcodes: Vec<OpCode>) -> Vec<Instruction> {
     let mut code: Vec<Instruction> = Vec::new();
     let mut loop_begin = 0;
@@ -67,7 +68,7 @@ fn parse(opcodes: Vec<OpCode>) -> Vec<Instruction> {
                 OpCode::Write => Some(Instruction::Write),
 
                 OpCode::LoopStart => {
-                    loop_begin = 1;
+                    loop_begin = i;
                     loop_stack += 1;
                     None
                 }
@@ -109,6 +110,7 @@ fn parse(opcodes: Vec<OpCode>) -> Vec<Instruction> {
     code
 }
 
+// executes the brainfuck interpreter
 fn brainfuck(instructions: &Vec<Instruction>, buffer: &mut Vec<u8>, data_ptr: &mut usize) {
     for item in instructions {
         match item {
@@ -133,5 +135,24 @@ fn brainfuck(instructions: &Vec<Instruction>, buffer: &mut Vec<u8>, data_ptr: &m
 
 fn main() {
     // TODO: use clap to rewrite the cmdline args parsing part
-    todo!();
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() != 2 {
+        println!("Error: include a .bf file");
+        return();
+    }
+
+    let filename = &args[1];
+
+    let mut file = File::open(filename).expect("file not found");
+    let mut src = String::new();
+    file.read_to_string(&mut src).expect("Failed to read from file");
+
+    let opcodes = trans(src);
+    let instructions = parse(opcodes);
+
+    let mut buffer: Vec<u8> = vec![0; 1024];
+    let mut data_ptr = 512;
+
+    brainfuck(&instructions, &mut buffer, & mut data_ptr);
 }
