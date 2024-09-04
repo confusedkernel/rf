@@ -1,6 +1,6 @@
-use std::env;
 use std::fs::File;
 use std::io::Read;
+use clap::Parser;
 
 #[derive(Clone)]
 enum OpCode {
@@ -23,6 +23,11 @@ enum Instruction {
     Write,
     Read,
     Loop(Vec<Instruction>),
+}
+
+#[derive(Parser, Debug)]
+struct CmdArgs {
+    file: String,
 }
 
 // translate the brainfuck code into opcodes
@@ -134,15 +139,9 @@ fn brainfuck(instructions: &Vec<Instruction>, buffer: &mut Vec<u8>, data_ptr: &m
 }
 
 fn main() {
-    // TODO: use clap to rewrite the cmdline args parsing part
-    let args: Vec<String> = env::args().collect();
+    let args = CmdArgs::parse();
 
-    if args.len() != 2 {
-        println!("Error: include a .bf file");
-        return();
-    }
-
-    let filename = &args[1];
+    let filename = args.file;
 
     let mut file = File::open(filename).expect("file not found");
     let mut src = String::new();
